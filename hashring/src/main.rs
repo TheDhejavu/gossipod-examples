@@ -1,19 +1,16 @@
-use std::collections::BTreeMap;
 use std::fmt::Debug;
-use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use std::net::{IpAddr, SocketAddr};
 use std::sync::Arc;
 use std::time::Duration;
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result};
 use async_trait::async_trait;
 use clap::Parser;
 use gossipod::{config::{GossipodConfigBuilder, NetworkType}, DispatchEventHandler, Gossipod, Node, NodeMetadata};
 use hash_ring::HashRing;
 use log::*;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use tokio::sync::RwLock;
 use tokio::time;
-use std::str::FromStr;
 
 const NODE_NAME: &str = "NODE_1";
 const BIND_PORT: u16 = 7948;
@@ -101,7 +98,7 @@ impl SwimNode {
         let config = GossipodConfigBuilder::new()
             .name(&args.name)
             .port(args.port)
-            .addr(args.ip.parse::<Ipv4Addr>().expect("Invalid IP address"))
+            .addr(args.ip.parse::<IpAddr>().expect("Invalid IP address"))
             .probing_interval(Duration::from_secs(5))
             .ack_timeout(Duration::from_millis(500))
             .indirect_ack_timeout(Duration::from_secs(1))
