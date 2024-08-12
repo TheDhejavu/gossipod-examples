@@ -159,24 +159,26 @@ async fn handle_connection(
     info!("Connection handler for {} finished", remote_addr);
 }
 
+type TransportError = Box<dyn std::error::Error + Send + Sync>;
+
 #[async_trait]
 impl DatagramTransport for QuicTransport {
     fn incoming(&self) -> broadcast::Receiver<Datagram> {
         self.datagram_tx.subscribe()
     }
 
-    async fn send_to(&self, target: SocketAddr, data: &[u8]) -> Result<()> {
+    async fn send_to(&self, target: SocketAddr, data: &[u8]) -> Result<(), TransportError> {
         let conn = self.connect(target).await?;
         let bytes = Bytes::copy_from_slice(data);
         conn.send_datagram(bytes)?;
         Ok(())
     }
 
-    fn local_addr(&self) -> Result<SocketAddr> {
+    fn local_addr(&self) -> Result<SocketAddr, TransportError> {
         Ok(self.endpoint.local_addr()?)
     }
 
-    async fn shutdown(&self) -> Result<()> {
+    async fn shutdown(&self) -> Result<(), TransportError> {
         self.shutdown_signal.send(())
             .map_err(|_| anyhow!("Failed to send shutdown signal"))?;
         
