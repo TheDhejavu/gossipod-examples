@@ -1,3 +1,4 @@
+use std::error::Error;
 use std::fmt::Debug;
 use std::net::{IpAddr, SocketAddr};
 use std::sync::Arc;
@@ -55,9 +56,11 @@ struct SwimEventHandler {
     ring: Arc<RwLock<HashRing<VNode>>>,
 }
 
+type DispatchError = Box<dyn Error + Send + Sync>;
+
 #[async_trait]
 impl<M: NodeMetadata> DispatchEventHandler<M> for SwimEventHandler {
-    async fn notify_dead(&self, node: &Node<M>) -> Result<()> {
+    async fn notify_dead(&self, node: &Node<M>) -> Result<(), DispatchError> {
         info!("Node {} detected as dead", node.name);
         let mut ring = self.ring.write().await;
         let node = VNode::new(node.socket_addr()? ,node.name.to_string());
@@ -67,7 +70,7 @@ impl<M: NodeMetadata> DispatchEventHandler<M> for SwimEventHandler {
         Ok(())
     }
 
-    async fn notify_leave(&self, node: &Node<M>) -> Result<()> {
+    async fn notify_leave(&self, node: &Node<M>) -> Result<(), DispatchError> {
         info!("Node {} is leaving the cluster", node.name);
         let mut ring = self.ring.write().await;
         let node = VNode::new(node.socket_addr()? ,node.name.to_string());
@@ -77,7 +80,7 @@ impl<M: NodeMetadata> DispatchEventHandler<M> for SwimEventHandler {
         Ok(())
     }
 
-    async fn notify_join(&self, node: &Node<M>) -> Result<()> {
+    async fn notify_join(&self, node: &Node<M>) -> Result<(), DispatchError> {
         info!("Node {} has joined the cluster", node.name);
         let mut ring = self.ring.write().await;
         
@@ -87,7 +90,7 @@ impl<M: NodeMetadata> DispatchEventHandler<M> for SwimEventHandler {
         Ok(())
     }
 
-    async fn notify_message(&self, from: SocketAddr, message: Vec<u8>) -> Result<()> {
+    async fn notify_message(&self, from: SocketAddr, message: Vec<u8>) -> Result<(), DispatchError> {
         info!("Received message from {}: {:?}", from, message);
         Ok(())
     }
@@ -217,6 +220,10 @@ struct Args {
 #[tokio::main]
 async fn main() -> Result<()> {
     let args = Args::parse();
+    env_logger::Builder::new()
+    .filter_level(::log::LevelFilter::Info) 
+    .filter_level(::log::LevelFilter::Debug)
+    .init();
 
     let node = SwimNode::new(&args).await?;
     node.start().await?;
