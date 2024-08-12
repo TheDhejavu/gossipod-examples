@@ -17,3 +17,10 @@ tokio = { version = "1.0", features = ["full"] }
 tokio-util = { version = "0.7.1", features = ["codec"] }
 log = "0.4"
 hashring = "0.3.6"
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.10", features = ["env-filter"] }
+metrics = "0.20"
+metrics-exporter-prometheus = "0.11"
+warp = "0.3"
+prometheus = "0.13.4"
+hyper = { version = "^0.14", features = ["server", "http1", "tcp"] }

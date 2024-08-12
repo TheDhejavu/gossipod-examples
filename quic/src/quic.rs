@@ -7,7 +7,7 @@ use quinn::{Endpoint, Connection, ClientConfig, ServerConfig, ConnectionError};
 use tokio::sync::{broadcast, Mutex, RwLock};
 use async_trait::async_trait;
 use std::net::SocketAddr;
-use log::*;
+use tracing::*;
 use bytes::Bytes;
 
 

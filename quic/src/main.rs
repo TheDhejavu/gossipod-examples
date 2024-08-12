@@ -8,10 +8,15 @@ use async_trait::async_trait;
 use clap::Parser;
 use gossipod::{DefaultBroadcastQueue, DefaultMetadata};
 use gossipod::{config::{GossipodConfigBuilder, NetworkType}, DispatchEventHandler, Gossipod, Node, NodeMetadata};
-use log::*;
+use tracing::*;
 use tokio::sync::mpsc;
 use tokio::time;
 use quic::QuicTransport;
+use tracing_subscriber::{fmt, EnvFilter};
+use tracing::{info, error};
+use tracing_subscriber::layer::SubscriberExt as _;
+use tracing_subscriber::util::SubscriberInitExt as _;
+
 mod quic;
 
 const NODE_NAME: &str = "QUINN_NODE_1";
@@ -135,14 +140,25 @@ struct Args {
     join_addr: Option<String>,
 }
 
+fn setup_tracing() {
+    let fmt_layer = fmt::layer()
+        .with_target(true)
+        .with_ansi(true)
+        .with_level(true);
+
+    let filter_layer = EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| EnvFilter::new("debug"));
+
+    tracing_subscriber::registry()
+        .with(filter_layer)
+        .with(fmt_layer)
+        .init();
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let args = Args::parse();
-    env_logger::Builder::new()
-    .filter_level(::log::LevelFilter::Info) 
-    .filter_level(::log::LevelFilter::Debug)
-    .init();
-
+    setup_tracing();
     let node = SwimNode::new(&args).await?;
     node.start().await?;
 
