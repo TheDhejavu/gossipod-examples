@@ -1,0 +1,26 @@
+[package]
+name = "quinn"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# gossipod = { git = "github.com/TheDhejavu/gossipod" }
+gossipod = { path = "../../gossipod" }
+env_logger = "0.11.5"
+async-trait = "0.1.81"
+clap = { version = "4.3", features = ["derive"] }
+anyhow = { version = "1.0.56", features = ["backtrace"] }
+serde = { version = "1.0.136", features = ["derive"] }
+serde_json = "1.0.79"
+tokio = { version = "1.0", features = ["full"] }
+tokio-util = { version = "0.7.1", features = ["codec"] }
+log = "0.4"
+quinn = "0.10.2"
+quinn-proto = "0.10.5"
+quinn-plaintext = { version = "0.2.0" }
+rcgen = "0.13.1"
+tracing = "0.1"
+tracing-futures = "0.2"
+rustls = { version = "0.21.0", features = ["dangerous_configuration", "quic"] }
+rustls-pemfile = "1.0.2"
+bytes = "1.0"
